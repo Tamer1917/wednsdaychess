@@ -36,7 +36,7 @@
 
             // تحديث اسم المستخدم في HTML
             if (user) {
-                document.getElementById("username").textContent = user.first_name;
+                document.getElementById("username").textContent = user.username;
                 
                 // جلب النقاط من Firebase
                 const userRef = ref(db, 'users/' + user.id);
