@@ -132,87 +132,91 @@
         </nav>
     </div>
 
- <script type="module">
-    // Import Firebase SDKs
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
 
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyBaHujfhSY-Hd_u-CzsAqIfZ9eGMree4Oo",
-        authDomain: "mychessgame-7811e.firebaseapp.com",
-        projectId: "mychessgame-7811e",
-        storageBucket: "mychessgame-7811e.firebasestorage.app",
-        messagingSenderId: "512952991572",
-        appId: "1:512952991572:web:eae4a9c91bbfc0552b92c1",
-        measurementId: "G-HKH7LH05V0"
-    };
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaHujfhSY-Hd_u-CzsAqIfZ9eGMree4Oo",
+            authDomain: "mychessgame-7811e.firebaseapp.com",
+            projectId: "mychessgame-7811e",
+            storageBucket: "mychessgame-7811e.firebasestorage.app",
+            messagingSenderId: "512952991572",
+            appId: "1:512952991572:web:eae4a9c91bbfc0552b92c1",
+            measurementId: "G-HKH7LH05V0"
+        };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-    const auth = getAuth();
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth();
 
-    // Extract userId and username from URL
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
-    const userId = getQueryParam("userId") || "defaultUser";
-    const username = getQueryParam("username") || "User";
+        // Extract userId and username from URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        const userId = getQueryParam("telegramUserId") || "defaultUser";
+        const username = getQueryParam("username") || "User";
 
-    // تسجيل دخول مجهول
-    signInAnonymously(auth).then(() => {
-        console.log('تم تسجيل الدخول بنجاح');
-        fetchOrInitializeUserData();
-    }).catch((error) => {
-        console.error('حدث خطأ أثناء تسجيل الدخول:', error.message);
-    });
+        // طباعة المعلمات في وحدة التحكم
+        console.log("Received userId:", userId);
+        console.log("Received username:", username);
 
-    // استرجاع أو تهيئة بيانات المستخدم في Firebase
-    function fetchOrInitializeUserData() {
-        const userRef = ref(database, `users/${userId}`);
-
-        get(userRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                console.log("بيانات المستخدم موجودة:", userData);
-
-                // عرض بيانات المستخدم
-                displayUserData(userData.username || username, userData.points);
-            } else {
-                console.log("المستخدم جديد، جاري إضافة نقاط مجانية...");
-                const initialData = {
-                    username: username,
-                    points: 5 // إضافة 5 نقاط للمستخدم الجديد
-                };
-
-                set(userRef, initialData).then(() => {
-                    displayUserData(initialData.username, initialData.points);
-                }).catch((error) => {
-                    console.error("خطأ أثناء إضافة المستخدم الجديد:", error.message);
-                });
-            }
+        // تسجيل دخول مجهول
+        signInAnonymously(auth).then(() => {
+            console.log('تم تسجيل الدخول بنجاح');
+            fetchOrInitializeUserData();
         }).catch((error) => {
-            console.error("حدث خطأ أثناء جلب البيانات:", error.message);
+            console.error('حدث خطأ أثناء تسجيل الدخول:', error.message);
         });
-    }
 
-    // عرض بيانات المستخدم في الصفحة
-    function displayUserData(username, points) {
-        document.getElementById("username").innerHTML = `Welcome, <b>${username}</b>!`;
-        document.getElementById("balance").textContent = points || 0;
-    }
+        // استرجاع أو تهيئة بيانات المستخدم في Firebase
+        function fetchOrInitializeUserData() {
+            const userRef = ref(database, `users/${userId}`);
 
-    // معالجة شاشة التحميل
-    window.onload = function() {
-        setTimeout(() => {
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.body.classList.add('loaded');
-        }, 3000);
-    };
-</script>
+            get(userRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    console.log("بيانات المستخدم موجودة:", userData);
+
+                    // عرض بيانات المستخدم
+                    displayUserData(userData.username || username, userData.points);
+                } else {
+                    console.log("المستخدم جديد، جاري إضافة نقاط مجانية...");
+                    const initialData = {
+                        username: username,
+                        points: 5 // إضافة 5 نقاط للمستخدم الجديد
+                    };
+
+                    set(userRef, initialData).then(() => {
+                        displayUserData(initialData.username, initialData.points);
+                    }).catch((error) => {
+                        console.error("خطأ أثناء إضافة المستخدم الجديد:", error.message);
+                    });
+                }
+            }).catch((error) => {
+                console.error("حدث خطأ أثناء جلب البيانات:", error.message);
+            });
+        }
+
+        // عرض بيانات المستخدم في الصفحة
+        function displayUserData(username, points) {
+            document.getElementById("username").innerHTML = `Welcome, <b>${username}</b>!`;
+            document.getElementById("balance").textContent = points || 0;
+        }
+
+        // معالجة شاشة التحميل
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                document.body.classList.add('loaded');
+            }, 3000);
+        };
+    </script>
 </body>
 </html>
