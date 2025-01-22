@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Tasks</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="material/css/styles.css">
+    <style>
+        /* شاشة التحميل */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('material/images/loading.gif') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+
+        .loading-container h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            border-left: 8px solid #d5d7dd;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* باقي تنسيقات الصفحة */
+        body.loaded {
+            overflow: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #balance-container {
+            margin: 20px;
+            font-size: 18px;
+        }
+
+        .task-container {
+            margin: 10px auto;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div class="loading-container" id="loading-screen">
+        <div>
+            <h1>Loading...</h1>
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- الصفحة الرئيسية -->
+    <div id="main-content" class="hidden">
+        <div id="balance-container">
+            <h2 id="username">Welcome, <b>User</b>!</h2>
+            <span id="balance">0</span> 🦴 total dogs
+        </div>
+        <br>
+
+        <div class="task-container">
+            <!-- المهام -->
+            <div class="task">
+                <div class="task-detail">
+                    <div class="task-image">
+                        <img src="material/images/logo.png" width="45px" alt="">
+                    </div>
+                    <div>
+                        <h4>claim rewards</h4>
+                        <div class="task-data">
+                            <img src="material/images/logo.png" width="20px" alt="Coin Icon">
+                            <h5>300</h5>
+                        </div>
+                    </div>
+                </div>
+                <button class="task-button" onclick="completeTask(300, 'reword.html')">🦴 claim</button>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>HOME</span>
+            </a>
+            <a href="leaderboard.html" class="nav-item">
+                <i class="fas fa-trophy"></i>
+                <span>LEADERBOARD</span>
+            </a>
+            <a href="invite-friends.html" class="nav-item">
+                <i class="fas fa-user-friends"></i>
+                <span>FRIENDS</span>
+            </a>
+            <a href="task.html" class="nav-item">
+                <i class="fas fa-tasks"></i>
+                <span>TASKS</span>
+            </a>
+            <a href="balance.html" class="nav-item">
+                <i class="fas fa-wallet"></i>
+                <span>BALANCE</span>
+            </a>
+        </nav>
+    </div>
+
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaHujfhSY-Hd_u-CzsAqIfZ9eGMree4Oo",
+            authDomain: "mychessgame-7811e.firebaseapp.com",
+            projectId: "mychessgame-7811e",
+            storageBucket: "mychessgame-7811e.firebasestorage.app",
+            messagingSenderId: "512952991572",
+            appId: "1:512952991572:web:eae4a9c91bbfc0552b92c1",
+            measurementId: "G-HKH7LH05V0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth();
+
+        // Extract userId from URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const userId = getQueryParam("userId") || "defaultUser";
+        
+        // Extract username from URL
+        const username = getQueryParam("username") || "User";
+
+        // تسجيل دخول مجهول
+        signInAnonymously(auth).then(() => {
+            console.log('تم تسجيل الدخول بنجاح');
+            fetchOrInitializeUserData();
+        }).catch((error) => {
+            console.error('حدث خطأ أثناء تسجيل الدخول:', error.message);
+        });
+
+        // استرجاع أو تهيئة بيانات المستخدم في Firebase
+        function fetchOrInitializeUserData() {
+            const userRef = ref(database, `users/${userId}`);
+
+            get(userRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    console.log("بيانات المستخدم موجودة:", userData);
+
+                    // عرض بيانات المستخدم
+                    displayUserData(userData.username || username, userData.points);
+                } else {
+                    console.log("المستخدم جديد، جاري إضافة نقاط مجانية...");
+                    const initialData = {
+                        username: username,
+                        points: 5 // إضافة 5 نقاط للمستخدم الجديد
+                    };
+
+                    set(userRef, initialData).then(() => {
+                        displayUserData(initialData.username, initialData.points);
+                    }).catch((error) => {
+                        console.error("خطأ أثناء إضافة المستخدم الجديد:", error.message);
+                    });
+                }
+            }).catch((error) => {
+                console.error("حدث خطأ أثناء جلب البيانات:", error.message);
+            });
+        }
+
+        // عرض بيانات المستخدم في الصفحة
+        function displayUserData(username, points) {
+            document.getElementById("username").innerHTML = `Welcome, <b>${username}</b>!`;
+            document.getElementById("balance").textContent = points || 0;
+        }
+
+        // معالجة شاشة التحميل
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                document.body.classList.add('loaded');
+            }, 3000);
+        };
+    </script>
+</body>
+</html>
