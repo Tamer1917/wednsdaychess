@@ -23,7 +23,7 @@
             projectId: "mychessgame-7811e",
             storageBucket: "mychessgame-7811e.appspot.com",
             messagingSenderId: "512952991572",
-            appId: "أmychessgame-7811e"
+            appId: "your_app_id"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -42,7 +42,7 @@
                 const userRef = ref(db, 'users/' + user.id);
                 get(userRef).then((snapshot) => {
                     if (snapshot.exists()) {
-                        document.getElementById("score").textContent = snapshot.val().score;
+                        document.getElementById("score").textContent = snapshot.val().points;
                     } else {
                         document.getElementById("score").textContent = "0";
                     }
