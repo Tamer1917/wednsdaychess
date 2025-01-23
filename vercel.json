@@ -1,8 +1,9 @@
 {
+  "version": 2,
+  "builds": [
+    { "src": "api/index.py", "use": "@vercel/python" }
+  ],
   "routes": [
-    {
-      "src": "/update-score",
-      "dest": "/api/update-score.py"
-    }
+    { "src": "/update-score", "dest": "/api/index.py" }
   ]
 }
